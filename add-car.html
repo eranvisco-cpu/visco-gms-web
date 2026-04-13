@@ -213,8 +213,8 @@
                 const timestamp = Date.now();
                 const sanitizedPlate = plate.replace(/\s+/g, '_').toUpperCase();
                 
-                const rearFileName = `${timestamp}_${sanitizedPlate}_rear.jpg`;
-                const vinFileName = `${timestamp}_${sanitizedPlate}_vin.jpg`;
+                const rearFileName = `${sanitizedPlate}/${timestamp}_rear.jpg`;
+                const vinFileName = `${sanitizedPlate}/${timestamp}_vin.jpg`;
 
                 // =====================================================
                 // UPLOAD IMAGES TO SUPABASE STORAGE
@@ -222,7 +222,7 @@
                 
                 // Upload Rear Photo
                 const { error: rearUploadError } = await supabaseClient.storage
-                    .from('garage-docs')
+                    .from('car-photos')
                     .upload(rearFileName, rearImgFile, {
                         upsert: false,
                     });
@@ -233,7 +233,7 @@
 
                 // Upload VIN Photo
                 const { error: vinUploadError } = await supabaseClient.storage
-                    .from('garage-docs')
+                    .from('car-photos')
                     .upload(vinFileName, vinImgFile, {
                         upsert: false,
                     });
@@ -247,11 +247,11 @@
                 // =====================================================
                 
                 const { data: rearUrlData } = supabaseClient.storage
-                    .from('garage-docs')
+                    .from('car-photos')
                     .getPublicUrl(rearFileName);
 
                 const { data: vinUrlData } = supabaseClient.storage
-                    .from('garage-docs')
+                    .from('car-photos')
                     .getPublicUrl(vinFileName);
 
                 const rearImageUrl = rearUrlData.publicUrl;
