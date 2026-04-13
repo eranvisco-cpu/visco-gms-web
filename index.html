@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visco GMS - Car Inspection System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #121212; color: white; }
+        .card { background-color: #1e1e1e; border-radius: 12px; overflow: hidden; }
+        .status-pending { color: #ff4d4d; font-weight: bold; }
+    </style>
+</head>
+<body class="p-4">
+    <header class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Visco GMS</h1>
+        <div class="flex gap-4">
+            <i class="fas fa-search text-xl"></i>
+            <i class="fas fa-plus text-xl text-yellow-500"></i>
+        </div>
+    </header>
+
+    <div id="vehicle-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <p>Loading vehicles...</p>
+    </div>
+
+    <button onclick="window.location.href='add-car.html'" class="fixed bottom-6 right-6 bg-yellow-500 text-black w-14 h-14 rounded-full shadow-lg flex items-center justify-center">
+        <i class="fas fa-plus text-2xl"></i>
+    </button>
+
+    <script src="app.js"></script>
+</body>
+</html>

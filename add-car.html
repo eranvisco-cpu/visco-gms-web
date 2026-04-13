@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Vehicle - Visco GMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#121212] text-white p-5">
+    <h1 class="text-2xl font-bold mb-6 text-yellow-500">New Inspection</h1>
+    
+    <form id="carForm" class="space-y-4">
+        <div>
+            <label class="block text-sm text-gray-400">Plate Number</label>
+            <input type="text" id="plate" class="w-full bg-[#1e1e1e] p-3 rounded border border-gray-700 uppercase" placeholder="DXB B 57611" required>
+        </div>
+        <div>
+            <label class="block text-sm text-gray-400">Car Model</label>
+            <input type="text" id="model" class="w-full bg-[#1e1e1e] p-3 rounded border border-gray-700" placeholder="Nissan Sunny">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm text-gray-400">Rear Photo</label>
+                <input type="file" id="rearImg" accept="image/*" capture="environment" class="text-xs">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400">VIN Photo</label>
+                <input type="file" id="vinImg" accept="image/*" capture="environment" class="text-xs">
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400">Customer Voice</label>
+            <textarea id="voice" class="w-full bg-[#1e1e1e] p-3 rounded border border-gray-700" rows="2"></textarea>
+        </div>
+
+        <button type="submit" class="w-full bg-yellow-500 text-black font-bold p-4 rounded-lg">SAVE INSPECTION</button>
+        <button type="button" onclick="window.location.href='index.html'" class="w-full bg-gray-700 p-2 rounded-lg text-sm">Cancel</button>
+    </form>
+
+    <script>
+        // Supabase login details
+        const supabase = supabase.createClient('https://tqrvcwkulrdqtbkyyvks.supabase.coYOUR_SUPABASE_URL', 'sb_publishable_EKSG2uUBWxrrFTtzKcg0AA_i2IWdaRo');
+
+        document.getElementById('carForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
+            const plate = document.getElementById('plate').value;
+            const model = document.getElementById('model').value;
+
+            // 1. Data save kirima
+            const { data, error } = await supabase
+                .from('vehicles')
+                .insert([{ plate_number: plate, car_model: model, status: '01 Inspection' }]);
+
+            if (error) alert(error.message);
+            else window.location.href = 'index.html';
+        };
+    </script>
+</body>
+</html>
