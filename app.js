@@ -90,22 +90,3 @@ async function fetchVehicles() {
 }
 
 fetchVehicles();
-
-// වාහනයක් මකා දැමීමේ function එක
-async function deleteVehicle(id) {
-    const confirmation = confirm("ඔබට විශ්වාසද මෙම වාහනයේ විස්තර මකා දැමීමට අවශ්‍ය බව?");
-    
-    if (confirmation) {
-        const { error } = await supabaseClient
-            .from('vehicles')
-            .delete()
-            .eq('id', id);
-
-        if (error) {
-            alert("Error deleting vehicle: " + error.message);
-        } else {
-            alert("සාර්ථකව මකා දමන ලදී!");
-            fetchVehicles(); // ලැයිස්තුව Refresh කරන්න
-        }
-    }
-}
