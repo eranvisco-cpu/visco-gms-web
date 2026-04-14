@@ -74,12 +74,12 @@ async function fetchVehicles() {
                     </div>
                     
                     <!-- Action Buttons -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="window.location.href='edit-car.html?id=${vehicle.id}'" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
-                            <i class="fas fa-edit"></i> Edit
+                    <div class="flex gap-4 mt-4 border-t border-gray-800 pt-3">
+                        <button onclick="window.location.href='edit-car.html?id=${vehicle.id}'" class="text-blue-500 text-sm font-semibold hover:underline">
+                            EDIT
                         </button>
-                        <button onclick="deleteVehicle(${vehicle.id})" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
-                            <i class="fas fa-trash"></i> Delete
+                        <button onclick="deleteVehicle(${vehicle.id})" class="text-red-500 text-sm font-semibold hover:underline">
+                            DELETE
                         </button>
                     </div>
                 </div>
@@ -90,3 +90,22 @@ async function fetchVehicles() {
 }
 
 fetchVehicles();
+
+// වාහනයක් මකා දැමීමේ function එක
+async function deleteVehicle(id) {
+    const confirmation = confirm("ඔබට විශ්වාසද මෙම වාහනයේ විස්තර මකා දැමීමට අවශ්‍ය බව?");
+    
+    if (confirmation) {
+        const { error } = await supabaseClient
+            .from('vehicles')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            alert("Error deleting vehicle: " + error.message);
+        } else {
+            alert("සාර්ථකව මකා දමන ලදී!");
+            fetchVehicles(); // ලැයිස්තුව Refresh කරන්න
+        }
+    }
+}
