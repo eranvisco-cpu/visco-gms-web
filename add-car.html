@@ -324,7 +324,7 @@
                         image_url: rearImageUrl,
                         vin_image_url: vinImageUrl,
                         created_at: new Date().toISOString(),
-                    });
+                    }]);
 
                 if (insertError) {
                     throw new Error(`Failed to save vehicle data: ${insertError.message}`);
