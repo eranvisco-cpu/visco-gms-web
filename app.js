@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://tqrvcwkulrdqtbkyyvks.supabase.co'; 
-const SUPABASE_KEY = 'Ysb_publishable_EKSG2uUBWxrrFTtzKcg0AA_i2IWdaRo'; 
+const SUPABASE_KEY = 'sb_publishable_EKSG2uUBWxrrFTtzKcg0AA_i2IWdaRo'; 
 
 // මෙතන නම වෙනස් කළා Error එක එන නිසා
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
