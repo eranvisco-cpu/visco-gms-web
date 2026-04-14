@@ -24,32 +24,69 @@
         <!-- Form Container -->
         <form id="carForm" class="bg-[#1a1a1a] border border-gray-800 rounded-lg shadow-2xl p-8 space-y-6">
             
+            <!-- Customer Information -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Customer Name -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2">
+                        <span class="text-yellow-400">*</span> Customer Name
+                    </label>
+                    <input type="text" id="customerName" class="w-full bg-[#252525] p-3 rounded-lg border border-gray-700 text-white focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400/30 transition" placeholder="e.g., Ahmed Al-Mansouri" required>
+                </div>
+                <!-- Customer Phone -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2">
+                        <span class="text-yellow-400">*</span> Customer Phone
+                    </label>
+                    <input type="tel" id="customerPhone" class="w-full bg-[#252525] p-3 rounded-lg border border-gray-700 text-white focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400/30 transition" placeholder="+971-50-123-4567" required>
+                </div>
+            </div>
+
             <!-- Plate Number -->
             <div>
                 <label class="block text-sm font-semibold text-gray-300 mb-2">
                     <span class="text-yellow-400">*</span> Plate Number
                 </label>
-                <input 
-                    type="text" 
-                    id="plate" 
-                    class="w-full bg-[#252525] p-3 rounded-lg border border-gray-700 text-white focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400/30 uppercase transition" 
-                    placeholder="DXB B 57611" 
-                    required
-                >
+                <input type="text" id="plate" class="w-full bg-[#252525] p-3 rounded-lg border border-gray-700 text-white focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400/30 uppercase transition" placeholder="DXB B 57611" required>
             </div>
 
-            <!-- Car Model -->
+            <!-- Vehicle Information -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Vehicle Brand -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2">
+                        <span class="text-yellow-400">*</span> Vehicle Brand
+                    </label>
+                    <input type="text" id="brand" class="w-full bg-[#252525] p-3 rounded-lg border border-gray-700 text-white focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400/30 transition" placeholder="e.g., Nissan, Toyota" required>
+                </div>
+                <!-- Car Model -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2">
+                        <span class="text-yellow-400">*</span> Car Model
+                    </label>
+                    <input type="text" id="model" class="w-full bg-[#252525] p-3 rounded-lg border border-gray-700 text-white focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400/30 transition" placeholder="e.g., Sunny, Camry" required>
+                </div>
+                <!-- Mileage -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2">
+                        <span class="text-yellow-400">*</span> Mileage (km)
+                    </label>
+                    <input type="number" id="mileage" class="w-full bg-[#252525] p-3 rounded-lg border border-gray-700 text-white focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400/30 transition" placeholder="e.g., 50000" min="0" required>
+                </div>
+            </div>
+
+            <!-- Fuel Type -->
             <div>
                 <label class="block text-sm font-semibold text-gray-300 mb-2">
-                    <span class="text-yellow-400">*</span> Car Model
+                    <span class="text-yellow-400">*</span> Fuel Type
                 </label>
-                <input 
-                    type="text" 
-                    id="model" 
-                    class="w-full bg-[#252525] p-3 rounded-lg border border-gray-700 text-white focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400/30 transition" 
-                    placeholder="e.g., Nissan Sunny, Toyota Camry" 
-                    required
-                >
+                <select id="fuelType" class="w-full bg-[#252525] p-3 rounded-lg border border-gray-700 text-white focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400/30 transition" required>
+                    <option value="" disabled selected>Select fuel type...</option>
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Hybrid">Hybrid</option>
+                    <option value="Electric">Electric</option>
+                </select>
             </div>
 
             <!-- Image Uploads -->
@@ -187,15 +224,26 @@
             document.getElementById('successMsg').classList.add('hidden');
 
             // Get form values
+            const customerName = document.getElementById('customerName').value.trim();
+            const customerPhone = document.getElementById('customerPhone').value.trim();
             const plate = document.getElementById('plate').value.trim();
+            const brand = document.getElementById('brand').value.trim();
             const model = document.getElementById('model').value.trim();
+            const mileage = parseInt(document.getElementById('mileage').value, 10);
+            const fuelType = document.getElementById('fuelType').value.trim();
             const voice = document.getElementById('voice').value.trim();
             const rearImgFile = document.getElementById('rearImg').files[0];
             const vinImgFile = document.getElementById('vinImg').files[0];
 
             // Validate form
-            if (!plate || !model || !rearImgFile || !vinImgFile) {
+            if (!customerName || !customerPhone || !plate || !brand || !model || !mileage || !fuelType || !rearImgFile || !vinImgFile) {
                 showError('Please fill all required fields and select both images.');
+                return;
+            }
+
+            // Validate mileage is a positive number
+            if (mileage < 0) {
+                showError('Mileage must be a positive number.');
                 return;
             }
 
@@ -264,14 +312,19 @@
                 const { error: insertError } = await supabaseClient
                     .from('vehicles')
                     .insert([{
+                        customer_name: customerName,
+                        customer_phone: customerPhone,
                         plate_number: plate,
+                        vehicle_brand: brand,
                         car_model: model,
+                        mileage: mileage,
+                        fuel_type: fuelType,
                         customer_voice: voice || null,
                         status: '01 Inspection',
                         image_url: rearImageUrl,
                         vin_image_url: vinImageUrl,
                         created_at: new Date().toISOString(),
-                    }]);
+                    });
 
                 if (insertError) {
                     throw new Error(`Failed to save vehicle data: ${insertError.message}`);
