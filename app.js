@@ -1,9 +1,12 @@
-const SUPABASE_URL = 'https://tqrvcwkulrdqtbkyyvks.supabase.coYOUR_SUPABASE_URL'; // ඔයාගේ URL එක මෙතනට දාන්න
-const SUPABASE_KEY = 'sb_publishable_EKSG2uUBWxrrFTtzKcg0AA_i2IWdaRo'; // ඔයාගේ Key එක මෙතනට දාන්න
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = 'https://tqrvcwkulrdqtbkyyvks.supabase.coYOUR_SUPABASE_URL'; 
+const SUPABASE_KEY = 'Ysb_publishable_EKSG2uUBWxrrFTtzKcg0AA_i2IWdaRo'; 
+
+// මෙතන නම වෙනස් කළා Error එක එන නිසා
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function fetchVehicles() {
-    const { data, error } = await supabase
+    // මෙතනත් supabaseClient ලෙස වෙනස් කළා
+    const { data, error } = await supabaseClient
         .from('vehicles')
         .select('*')
         .order('created_at', { ascending: false });
@@ -14,15 +17,16 @@ async function fetchVehicles() {
     }
 
     const grid = document.getElementById('vehicle-grid');
-    grid.innerHTML = ''; // කලින් තිබුණු දේවල් අයින් කරන්න
+    if(!grid) return; // grid එක නැත්නම් නතර කරන්න
+    
+    grid.innerHTML = ''; 
 
     data.forEach(vehicle => {
-        // පින්තූරයක් නැත්නම් පෙන්වන්න placeholder එකක් හදනවා
         const vehicleImage = vehicle.image_url ? vehicle.image_url : 'https://via.placeholder.com/400x300?text=No+Image';
 
         const card = `
             <div class="card shadow-lg bg-[#1e1e1e] rounded-xl overflow-hidden mb-4 border border-gray-800">
-                <img src="${vehicleImage}" class="w-full h-52 object-cover">
+                <img src="${vehicleImage}" class="w-full h-52 object-cover" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Not+Found'">
                 <div class="p-4">
                     <div class="flex justify-between items-start">
                         <div>
@@ -30,7 +34,7 @@ async function fetchVehicles() {
                             <p class="text-gray-400 text-sm">${vehicle.car_model || 'Unknown Model'}</p>
                         </div>
                         <span class="bg-yellow-500 text-black text-[10px] font-bold px-2 py-1 rounded">
-                            ${vehicle.status || 'PENDING'}
+                            ${vehicle.status || 'INSPECTION'}
                         </span>
                     </div>
                     <p class="text-gray-500 text-xs mt-2 italic">"${vehicle.customer_voice || 'No remarks'}"</p>
@@ -45,5 +49,4 @@ async function fetchVehicles() {
     });
 }
 
-// පිටුව Load වන විට වාහන ටික පෙන්වන්න
 fetchVehicles();
