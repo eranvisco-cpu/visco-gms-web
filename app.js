@@ -1,7 +1,7 @@
 const SUPABASE_URL = 'https://tqrvcwkulrdqtbkyyvks.supabase.co'; 
 const SUPABASE_KEY = 'sb_publishable_EKSG2uUBWxrrFTtzKcg0AA_i2IWdaRo'; 
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // =====================================================
 // DELETE VEHICLE FUNCTION
