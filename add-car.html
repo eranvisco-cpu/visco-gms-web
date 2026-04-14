@@ -144,6 +144,25 @@
                 </div>
             </div>
 
+            <!-- Instrument Cluster Image -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2">
+                    <span class="text-yellow-400">*</span> Instrument Cluster Photo
+                </label>
+                <div class="relative">
+                    <input type="file" id="clusterImg" accept="image/*" capture="environment" class="hidden" required>
+                    <label for="clusterImg" class="flex items-center justify-center w-full h-32 bg-[#252525] border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-yellow-400 hover:bg-[#2a2a2a] transition">
+                        <div class="text-center">
+                            <svg class="w-8 h-8 mx-auto text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            <p class="text-xs text-gray-400">Click to upload</p>
+                            <p id="clusterImgName" class="text-xs text-yellow-400 mt-1 truncate">No file selected</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
             <!-- Customer Voice -->
             <div>
                 <label class="block text-sm font-semibold text-gray-300 mb-2">Customer Voice / Notes</label>
@@ -213,6 +232,11 @@
             document.getElementById('vinImgName').textContent = fileName;
         });
 
+        document.getElementById('clusterImg').addEventListener('change', (e) => {
+            const fileName = e.target.files[0]?.name || 'No file selected';
+            document.getElementById('clusterImgName').textContent = fileName;
+        });
+
         // =====================================================
         // FORM SUBMISSION
         // =====================================================
@@ -234,10 +258,16 @@
             const voice = document.getElementById('voice').value.trim();
             const rearImgFile = document.getElementById('rearImg').files[0];
             const vinImgFile = document.getElementById('vinImg').files[0];
+            const clusterImgFile = document.getElementById('clusterImg').files[0];
+
+            // Capture current date and time
+            const now = new Date();
+            const inspectionDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
+            const inspectionTime = now.toTimeString().split(' ')[0]; // HH:MM:SS
 
             // Validate form
-            if (!customerName || !customerPhone || !plate || !brand || !model || !mileage || !fuelType || !rearImgFile || !vinImgFile) {
-                showError('Please fill all required fields and select both images.');
+            if (!customerName || !customerPhone || !plate || !brand || !model || !mileage || !fuelType || !rearImgFile || !vinImgFile || !clusterImgFile) {
+                showError('Please fill all required fields and select all three images.');
                 return;
             }
 
@@ -263,6 +293,7 @@
                 
                 const rearFileName = `${sanitizedPlate}/${timestamp}_rear.jpg`;
                 const vinFileName = `${sanitizedPlate}/${timestamp}_vin.jpg`;
+                const clusterFileName = `${sanitizedPlate}/${timestamp}_cluster.jpg`;
 
                 // =====================================================
                 // UPLOAD IMAGES TO SUPABASE STORAGE
@@ -290,6 +321,17 @@
                     throw new Error(`Failed to upload VIN photo: ${vinUploadError.message}`);
                 }
 
+                // Upload Instrument Cluster Photo
+                const { error: clusterUploadError } = await supabaseClient.storage
+                    .from('car-photos')
+                    .upload(clusterFileName, clusterImgFile, {
+                        upsert: false,
+                    });
+
+                if (clusterUploadError) {
+                    throw new Error(`Failed to upload cluster photo: ${clusterUploadError.message}`);
+                }
+
                 // =====================================================
                 // GET PUBLIC URLS
                 // =====================================================
@@ -302,8 +344,13 @@
                     .from('car-photos')
                     .getPublicUrl(vinFileName);
 
+                const { data: clusterUrlData } = supabaseClient.storage
+                    .from('car-photos')
+                    .getPublicUrl(clusterFileName);
+
                 const rearImageUrl = rearUrlData.publicUrl;
                 const vinImageUrl = vinUrlData.publicUrl;
+                const clusterImageUrl = clusterUrlData.publicUrl;
 
                 // =====================================================
                 // INSERT INTO VEHICLES TABLE
@@ -321,8 +368,11 @@
                         fuel_type: fuelType,
                         customer_voice: voice || null,
                         status: '01 Inspection',
+                        inspection_date: inspectionDate,
+                        inspection_time: inspectionTime,
                         image_url: rearImageUrl,
                         vin_image_url: vinImageUrl,
+                        cluster_image_url: clusterImageUrl,
                         created_at: new Date().toISOString(),
                     }]);
 
