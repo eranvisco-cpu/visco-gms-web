@@ -1,11 +1,41 @@
 const SUPABASE_URL = 'https://tqrvcwkulrdqtbkyyvks.supabase.co'; 
 const SUPABASE_KEY = 'sb_publishable_EKSG2uUBWxrrFTtzKcg0AA_i2IWdaRo'; 
 
-// මෙතන නම වෙනස් කළා Error එක එන නිසා
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// =====================================================
+// DELETE VEHICLE FUNCTION
+// =====================================================
+async function deleteVehicle(id) {
+    // Show confirmation dialog
+    if (!confirm('Are you sure you want to delete this vehicle record? This action cannot be undone.')) {
+        return;
+    }
+
+    try {
+        const { error } = await supabaseClient
+            .from('vehicles')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            alert(`Error deleting vehicle: ${error.message}`);
+            console.error('Delete error:', error);
+            return;
+        }
+
+        // Show success message
+        alert('Vehicle record deleted successfully!');
+        
+        // Refresh the vehicle list
+        fetchVehicles();
+    } catch (error) {
+        console.error('Unexpected error:', error);
+        alert('An unexpected error occurred. Please try again.');
+    }
+}
+
 async function fetchVehicles() {
-    // මෙතනත් supabaseClient ලෙස වෙනස් කළා
     const { data, error } = await supabaseClient
         .from('vehicles')
         .select('*')
@@ -17,7 +47,7 @@ async function fetchVehicles() {
     }
 
     const grid = document.getElementById('vehicle-grid');
-    if(!grid) return; // grid එක නැත්නම් නතර කරන්න
+    if(!grid) return;
     
     grid.innerHTML = ''; 
 
@@ -38,9 +68,19 @@ async function fetchVehicles() {
                         </span>
                     </div>
                     <p class="text-gray-500 text-xs mt-2 italic">"${vehicle.customer_voice || 'No remarks'}"</p>
-                    <div class="mt-4 flex justify-between items-center border-t border-gray-800 pt-3">
+                    <div class="mt-4 flex justify-between items-center border-t border-gray-800 pt-3 mb-4">
                         <span class="text-gray-500 text-[10px]">${new Date(vehicle.created_at).toLocaleDateString()}</span>
                         <button class="text-yellow-500 text-sm font-semibold hover:underline">VIEW DETAILS</button>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="window.location.href='edit-car.html?id=${vehicle.id}'" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button onclick="deleteVehicle(${vehicle.id})" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
                     </div>
                 </div>
             </div>
