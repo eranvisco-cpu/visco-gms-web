@@ -1,7 +1,14 @@
 const SUPABASE_URL = 'https://tqrvcwkulrdqtbkyyvks.supabase.co'; 
 const SUPABASE_KEY = 'sb_publishable_EKSG2uUBWxrrFTtzKcg0AA_i2IWdaRo'; 
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabaseClient;
+
+// Wait for Supabase to load
+if (window.supabase) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} else {
+    console.error('Supabase library not loaded');
+}
 
 // =====================================================
 // DELETE VEHICLE FUNCTION
@@ -89,4 +96,9 @@ async function fetchVehicles() {
     });
 }
 
-fetchVehicles();
+// Only fetch vehicles if Supabase client is initialized
+if (supabaseClient) {
+    fetchVehicles();
+} else {
+    console.warn('Supabase client not initialized. Waiting for library to load...');
+}
