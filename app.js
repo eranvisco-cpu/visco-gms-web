@@ -1,4 +1,4 @@
-const SUPABASE_URL = 'https://tqrvcwkulrdqtbkyyvks.supabase.co'; 
+﻿onst SUPABASE_URL = 'https://tqrvcwkulrdqtbkyyvks.supabase.co'; 
 const SUPABASE_KEY = 'sb_publishable_EKSG2uUBWxrrFTtzKcg0AA_i2IWdaRo'; 
 
 let supabaseClient;
@@ -85,7 +85,7 @@ async function fetchVehicles() {
                         <button onclick="window.location.href='edit-car.html?id=${vehicle.id}'" class="text-blue-500 text-sm font-semibold hover:underline">
                             EDIT
                         </button>
-                        <button onclick="deleteVehicle(${vehicle.id})" class="text-red-500 text-sm font-semibold hover:underline">
+                        <button onclick="deleteVehicle('${vehicle.id}')" class="text-red-500 text-sm font-semibold hover:underline">
                             DELETE
                         </button>
                     </div>

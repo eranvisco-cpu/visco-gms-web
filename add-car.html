@@ -103,6 +103,7 @@
                             accept="image/*" 
                             capture="environment" 
                             class="hidden" 
+                            onchange="previewImage(this, 'rearPreview')"
                             required
                         >
                         <label for="rearImg" class="flex items-center justify-center w-full h-32 bg-[#252525] border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-yellow-400 hover:bg-[#2a2a2a] transition">
@@ -115,6 +116,7 @@
                             </div>
                         </label>
                     </div>
+                    <img id="rearPreview" class="hidden mt-3 max-h-48 rounded-lg mx-auto object-contain" alt="Rear Photo Preview">
                 </div>
 
                 <!-- VIN Photo -->
@@ -129,6 +131,7 @@
                             accept="image/*" 
                             capture="environment" 
                             class="hidden" 
+                            onchange="previewImage(this, 'vinPreview')"
                             required
                         >
                         <label for="vinImg" class="flex items-center justify-center w-full h-32 bg-[#252525] border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-yellow-400 hover:bg-[#2a2a2a] transition">
@@ -141,6 +144,7 @@
                             </div>
                         </label>
                     </div>
+                    <img id="vinPreview" class="hidden mt-3 max-h-48 rounded-lg mx-auto object-contain" alt="VIN Photo Preview">
                 </div>
             </div>
 
@@ -150,7 +154,7 @@
                     <span class="text-yellow-400">*</span> Instrument Cluster Photo
                 </label>
                 <div class="relative">
-                    <input type="file" id="clusterImg" accept="image/*" capture="environment" class="hidden" required>
+                    <input type="file" id="clusterImg" accept="image/*" capture="environment" class="hidden" onchange="previewImage(this, 'clusterPreview')" required>
                     <label for="clusterImg" class="flex items-center justify-center w-full h-32 bg-[#252525] border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-yellow-400 hover:bg-[#2a2a2a] transition">
                         <div class="text-center">
                             <svg class="w-8 h-8 mx-auto text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,6 +165,7 @@
                         </div>
                     </label>
                 </div>
+                <img id="clusterPreview" class="hidden mt-3 max-h-48 rounded-lg mx-auto object-contain" alt="Instrument Cluster Preview">
             </div>
 
             <!-- Customer Voice -->
@@ -210,6 +215,26 @@
     </div>
 
     <script>
+        // =====================================================
+        // IMAGE PREVIEW FUNCTION
+        // =====================================================
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.classList.add('hidden');
+            }
+        }
+
         // =====================================================
         // SUPABASE CONFIGURATION
         // =====================================================
