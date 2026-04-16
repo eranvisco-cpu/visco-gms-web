@@ -96,17 +96,18 @@
                     <label class="block text-sm font-semibold text-gray-300 mb-2">
                         <span class="text-yellow-400">*</span> Rear Photo
                     </label>
-                    <div class="relative">
+                    <div class="relative h-52 bg-[#252525] border-2 border-dashed border-gray-600 rounded-lg overflow-hidden">
                         <input 
                             type="file" 
                             id="rearImg" 
                             accept="image/*" 
                             capture="environment" 
                             class="hidden" 
-                            onchange="previewImage(this, 'rearPreview')"
+                            onchange="previewImage(this, 'rearUploadPrompt', 'rearPreviewContainer')"
                             required
                         >
-                        <label for="rearImg" class="flex items-center justify-center w-full h-32 bg-[#252525] border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-yellow-400 hover:bg-[#2a2a2a] transition">
+                        <!-- Upload Prompt -->
+                        <label for="rearImg" id="rearUploadPrompt" class="flex items-center justify-center w-full h-full cursor-pointer hover:bg-[#2a2a2a] transition">
                             <div class="text-center">
                                 <svg class="w-8 h-8 mx-auto text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -115,8 +116,16 @@
                                 <p id="rearImgName" class="text-xs text-yellow-400 mt-1 truncate">No file selected</p>
                             </div>
                         </label>
+                        <!-- Preview Container -->
+                        <div id="rearPreviewContainer" class="hidden absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                            <img id="rearPreviewImg" class="max-h-full max-w-full object-contain" alt="Rear Photo Preview">
+                            <button id="rearChangeBtn" type="button" onclick="document.getElementById('rearImg').click()" class="absolute top-3 right-3 bg-yellow-500 hover:bg-yellow-600 text-black p-2 rounded-lg transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <img id="rearPreview" class="hidden mt-3 max-h-48 rounded-lg mx-auto object-contain" alt="Rear Photo Preview">
                 </div>
 
                 <!-- VIN Photo -->
@@ -124,17 +133,18 @@
                     <label class="block text-sm font-semibold text-gray-300 mb-2">
                         <span class="text-yellow-400">*</span> VIN Photo
                     </label>
-                    <div class="relative">
+                    <div class="relative h-52 bg-[#252525] border-2 border-dashed border-gray-600 rounded-lg overflow-hidden">
                         <input 
                             type="file" 
                             id="vinImg" 
                             accept="image/*" 
                             capture="environment" 
                             class="hidden" 
-                            onchange="previewImage(this, 'vinPreview')"
+                            onchange="previewImage(this, 'vinUploadPrompt', 'vinPreviewContainer')"
                             required
                         >
-                        <label for="vinImg" class="flex items-center justify-center w-full h-32 bg-[#252525] border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-yellow-400 hover:bg-[#2a2a2a] transition">
+                        <!-- Upload Prompt -->
+                        <label for="vinImg" id="vinUploadPrompt" class="flex items-center justify-center w-full h-full cursor-pointer hover:bg-[#2a2a2a] transition">
                             <div class="text-center">
                                 <svg class="w-8 h-8 mx-auto text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -143,8 +153,16 @@
                                 <p id="vinImgName" class="text-xs text-yellow-400 mt-1 truncate">No file selected</p>
                             </div>
                         </label>
+                        <!-- Preview Container -->
+                        <div id="vinPreviewContainer" class="hidden absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                            <img id="vinPreviewImg" class="max-h-full max-w-full object-contain" alt="VIN Photo Preview">
+                            <button id="vinChangeBtn" type="button" onclick="document.getElementById('vinImg').click()" class="absolute top-3 right-3 bg-yellow-500 hover:bg-yellow-600 text-black p-2 rounded-lg transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <img id="vinPreview" class="hidden mt-3 max-h-48 rounded-lg mx-auto object-contain" alt="VIN Photo Preview">
                 </div>
             </div>
 
@@ -153,9 +171,10 @@
                 <label class="block text-sm font-semibold text-gray-300 mb-2">
                     <span class="text-yellow-400">*</span> Instrument Cluster Photo
                 </label>
-                <div class="relative">
-                    <input type="file" id="clusterImg" accept="image/*" capture="environment" class="hidden" onchange="previewImage(this, 'clusterPreview')" required>
-                    <label for="clusterImg" class="flex items-center justify-center w-full h-32 bg-[#252525] border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-yellow-400 hover:bg-[#2a2a2a] transition">
+                <div class="relative h-52 bg-[#252525] border-2 border-dashed border-gray-600 rounded-lg overflow-hidden">
+                    <input type="file" id="clusterImg" accept="image/*" capture="environment" class="hidden" onchange="previewImage(this, 'clusterUploadPrompt', 'clusterPreviewContainer')" required>
+                    <!-- Upload Prompt -->
+                    <label for="clusterImg" id="clusterUploadPrompt" class="flex items-center justify-center w-full h-full cursor-pointer hover:bg-[#2a2a2a] transition">
                         <div class="text-center">
                             <svg class="w-8 h-8 mx-auto text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -164,8 +183,16 @@
                             <p id="clusterImgName" class="text-xs text-yellow-400 mt-1 truncate">No file selected</p>
                         </div>
                     </label>
+                    <!-- Preview Container -->
+                    <div id="clusterPreviewContainer" class="hidden absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                        <img id="clusterPreviewImg" class="max-h-full max-w-full object-contain" alt="Instrument Cluster Preview">
+                        <button id="clusterChangeBtn" type="button" onclick="document.getElementById('clusterImg').click()" class="absolute top-3 right-3 bg-yellow-500 hover:bg-yellow-600 text-black p-2 rounded-lg transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-                <img id="clusterPreview" class="hidden mt-3 max-h-48 rounded-lg mx-auto object-contain" alt="Instrument Cluster Preview">
             </div>
 
             <!-- Customer Voice -->
@@ -218,20 +245,29 @@
         // =====================================================
         // IMAGE PREVIEW FUNCTION
         // =====================================================
-        function previewImage(input, previewId) {
-            const preview = document.getElementById(previewId);
+        function previewImage(input, uploadPromptId, previewContainerId) {
+            const uploadPrompt = document.getElementById(uploadPromptId);
+            const previewContainer = document.getElementById(previewContainerId);
             
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 
                 reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.classList.remove('hidden');
+                    // Derive the preview image ID from the container ID
+                    const previewImgId = previewContainerId.replace('Container', 'Img');
+                    const previewImg = document.getElementById(previewImgId);
+                    
+                    previewImg.src = e.target.result;
+                    
+                    // Hide upload prompt and show preview
+                    uploadPrompt.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
                 };
                 
                 reader.readAsDataURL(input.files[0]);
             } else {
-                preview.classList.add('hidden');
+                uploadPrompt.classList.remove('hidden');
+                previewContainer.classList.add('hidden');
             }
         }
 
