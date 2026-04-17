@@ -251,6 +251,14 @@
             
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
+                const fileName = input.files[0].name;
+                
+                // Derive the file name display ID from the input ID
+                const fileNameDisplayId = input.id + 'Name';
+                const fileNameDisplay = document.getElementById(fileNameDisplayId);
+                if (fileNameDisplay) {
+                    fileNameDisplay.textContent = fileName;
+                }
                 
                 reader.onload = function(e) {
                     // Derive the preview image ID from the container ID
@@ -279,24 +287,6 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_EKSG2uUBWxrrFTtzKcg0AA_i2IWdaRo'; // Your anon/public key
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // =====================================================
-        // FILE INPUT LISTENERS
-        // =====================================================
-        document.getElementById('rearImg').addEventListener('change', (e) => {
-            const fileName = e.target.files[0]?.name || 'No file selected';
-            document.getElementById('rearImgName').textContent = fileName;
-        });
-
-        document.getElementById('vinImg').addEventListener('change', (e) => {
-            const fileName = e.target.files[0]?.name || 'No file selected';
-            document.getElementById('vinImgName').textContent = fileName;
-        });
-
-        document.getElementById('clusterImg').addEventListener('change', (e) => {
-            const fileName = e.target.files[0]?.name || 'No file selected';
-            document.getElementById('clusterImgName').textContent = fileName;
-        });
 
         // =====================================================
         // FORM SUBMISSION
