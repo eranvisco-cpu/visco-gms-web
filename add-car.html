@@ -249,6 +249,15 @@
             const uploadPrompt = document.getElementById(uploadPromptId);
             const previewContainer = document.getElementById(previewContainerId);
             
+            // Clear stored URLs if user is uploading a new rear or VIN photo
+            if (input.id === 'rearImg') {
+                photoState.rearPhotoUrl = null;
+                photoState.isRearFromDuplicate = false;
+            } else if (input.id === 'vinImg') {
+                photoState.vinPhotoUrl = null;
+                photoState.isVinFromDuplicate = false;
+            }
+            
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 const fileName = input.files[0].name;
@@ -289,6 +298,108 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // =====================================================
+        // STATE FOR DUPLICATE/RE-OPEN PHOTOS
+        // =====================================================
+        const photoState = {
+            rearPhotoUrl: null,
+            vinPhotoUrl: null,
+            isRearFromDuplicate: false,
+            isVinFromDuplicate: false
+        };
+
+        // =====================================================
+        // AUTO-FILL FROM DUPLICATE (RE-OPEN INSPECTION)
+        // =====================================================
+        function autoFillFromDuplicate() {
+            const duplicateData = localStorage.getItem('duplicateVehicleData');
+            
+            if (duplicateData) {
+                try {
+                    const data = JSON.parse(duplicateData);
+                    
+                    // Populate form fields
+                    if (data.customerName) document.getElementById('customerName').value = data.customerName;
+                    if (data.customerPhone) document.getElementById('customerPhone').value = data.customerPhone;
+                    if (data.plate) document.getElementById('plate').value = data.plate;
+                    if (data.brand) document.getElementById('brand').value = data.brand;
+                    if (data.model) document.getElementById('model').value = data.model;
+                    if (data.mileage) document.getElementById('mileage').value = data.mileage;
+                    if (data.fuelType) document.getElementById('fuelType').value = data.fuelType;
+                    if (data.voice) document.getElementById('voice').value = data.voice;
+                    
+                    // Load Rear Photo if available
+                    if (data.rearPhotoUrl) {
+                        const rearPreviewImg = document.getElementById('rearPreviewImg');
+                        const rearUploadPrompt = document.getElementById('rearUploadPrompt');
+                        const rearPreviewContainer = document.getElementById('rearPreviewContainer');
+                        const rearImgName = document.getElementById('rearImgName');
+                        
+                        if (rearPreviewImg) {
+                            rearPreviewImg.src = data.rearPhotoUrl;
+                            if (rearUploadPrompt) rearUploadPrompt.classList.add('hidden');
+                            if (rearPreviewContainer) rearPreviewContainer.classList.remove('hidden');
+                            if (rearImgName) rearImgName.textContent = 'Previous inspection photo loaded';
+                        }
+                        
+                        // Store in state for form submission
+                        photoState.rearPhotoUrl = data.rearPhotoUrl;
+                        photoState.isRearFromDuplicate = true;
+                    }
+                    
+                    // Load VIN Photo if available
+                    if (data.vinPhotoUrl) {
+                        const vinPreviewImg = document.getElementById('vinPreviewImg');
+                        const vinUploadPrompt = document.getElementById('vinUploadPrompt');
+                        const vinPreviewContainer = document.getElementById('vinPreviewContainer');
+                        const vinImgName = document.getElementById('vinImgName');
+                        
+                        if (vinPreviewImg) {
+                            vinPreviewImg.src = data.vinPhotoUrl;
+                            if (vinUploadPrompt) vinUploadPrompt.classList.add('hidden');
+                            if (vinPreviewContainer) vinPreviewContainer.classList.remove('hidden');
+                            if (vinImgName) vinImgName.textContent = 'Previous inspection photo loaded';
+                        }
+                        
+                        // Store in state for form submission
+                        photoState.vinPhotoUrl = data.vinPhotoUrl;
+                        photoState.isVinFromDuplicate = true;
+                    }
+                    
+                    // Update page title to show it's a re-open
+                    const pageTitle = document.querySelector('h1');
+                    if (pageTitle) {
+                        pageTitle.textContent = '🔄 RE-OPEN INSPECTION';
+                    }
+                    
+                    // Update button text
+                    const submitBtnText = document.getElementById('submitBtnText');
+                    if (submitBtnText) {
+                        submitBtnText.textContent = 'SAVE RE-INSPECTION';
+                    }
+                    
+                    // Show notification
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Re-opening Inspection',
+                        text: 'Previous vehicle, customer details, and photos have been restored. Instrument Cluster photo must be taken fresh. Update as needed and save.',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 4000
+                    });
+                    
+                    // Clear the localStorage after fetching
+                    localStorage.removeItem('duplicateVehicleData');
+                } catch (error) {
+                    console.error('Error parsing duplicate data:', error);
+                }
+            }
+        }
+
+        // Auto-fill when page loads
+        document.addEventListener('DOMContentLoaded', autoFillFromDuplicate);
+
+        // =====================================================
         // FORM SUBMISSION
         // =====================================================
         document.getElementById('carForm').addEventListener('submit', async (e) => {
@@ -317,8 +428,25 @@
             const inspectionTime = now.toTimeString().split(' ')[0]; // HH:MM:SS
 
             // Validate form
-            if (!customerName || !customerPhone || !plate || !brand || !model || !mileage || !fuelType || !rearImgFile || !vinImgFile || !clusterImgFile) {
-                showError('Please fill all required fields and select all three images.');
+            if (!customerName || !customerPhone || !plate || !brand || !model || !mileage || !fuelType) {
+                showError('Please fill all required fields.');
+                return;
+            }
+
+            // Validate images: Rear and VIN must have either a new file or stored URL
+            if (!rearImgFile && !photoState.rearPhotoUrl) {
+                showError('Please upload a Rear Photo or use a previous inspection photo.');
+                return;
+            }
+
+            if (!vinImgFile && !photoState.vinPhotoUrl) {
+                showError('Please upload a VIN Photo or use a previous inspection photo.');
+                return;
+            }
+
+            // Cluster image MUST be newly uploaded
+            if (!clusterImgFile) {
+                showError('Instrument Cluster photo must be taken fresh for every inspection.');
                 return;
             }
 
@@ -347,32 +475,52 @@
                 const clusterFileName = `${sanitizedPlate}/${timestamp}_cluster.jpg`;
 
                 // =====================================================
-                // UPLOAD IMAGES TO SUPABASE STORAGE
+                // UPLOAD IMAGES TO SUPABASE STORAGE (conditional)
                 // =====================================================
                 
-                // Upload Rear Photo
-                const { error: rearUploadError } = await supabaseClient.storage
-                    .from('car-photos')
-                    .upload(rearFileName, rearImgFile, {
-                        upsert: false,
-                    });
+                let rearImageUrl = photoState.rearPhotoUrl; // Start with stored URL if available
 
-                if (rearUploadError) {
-                    throw new Error(`Failed to upload rear photo: ${rearUploadError.message}`);
+                // Upload Rear Photo only if a new file is provided
+                if (rearImgFile) {
+                    const { error: rearUploadError } = await supabaseClient.storage
+                        .from('car-photos')
+                        .upload(rearFileName, rearImgFile, {
+                            upsert: false,
+                        });
+
+                    if (rearUploadError) {
+                        throw new Error(`Failed to upload rear photo: ${rearUploadError.message}`);
+                    }
+
+                    const { data: rearUrlData } = supabaseClient.storage
+                        .from('car-photos')
+                        .getPublicUrl(rearFileName);
+
+                    rearImageUrl = rearUrlData.publicUrl;
                 }
 
-                // Upload VIN Photo
-                const { error: vinUploadError } = await supabaseClient.storage
-                    .from('car-photos')
-                    .upload(vinFileName, vinImgFile, {
-                        upsert: false,
-                    });
+                let vinImageUrl = photoState.vinPhotoUrl; // Start with stored URL if available
 
-                if (vinUploadError) {
-                    throw new Error(`Failed to upload VIN photo: ${vinUploadError.message}`);
+                // Upload VIN Photo only if a new file is provided
+                if (vinImgFile) {
+                    const { error: vinUploadError } = await supabaseClient.storage
+                        .from('car-photos')
+                        .upload(vinFileName, vinImgFile, {
+                            upsert: false,
+                        });
+
+                    if (vinUploadError) {
+                        throw new Error(`Failed to upload VIN photo: ${vinUploadError.message}`);
+                    }
+
+                    const { data: vinUrlData } = supabaseClient.storage
+                        .from('car-photos')
+                        .getPublicUrl(vinFileName);
+
+                    vinImageUrl = vinUrlData.publicUrl;
                 }
 
-                // Upload Instrument Cluster Photo
+                // Upload Instrument Cluster Photo (ALWAYS required as new)
                 const { error: clusterUploadError } = await supabaseClient.storage
                     .from('car-photos')
                     .upload(clusterFileName, clusterImgFile, {
@@ -383,24 +531,10 @@
                     throw new Error(`Failed to upload cluster photo: ${clusterUploadError.message}`);
                 }
 
-                // =====================================================
-                // GET PUBLIC URLS
-                // =====================================================
-                
-                const { data: rearUrlData } = supabaseClient.storage
-                    .from('car-photos')
-                    .getPublicUrl(rearFileName);
-
-                const { data: vinUrlData } = supabaseClient.storage
-                    .from('car-photos')
-                    .getPublicUrl(vinFileName);
-
                 const { data: clusterUrlData } = supabaseClient.storage
                     .from('car-photos')
                     .getPublicUrl(clusterFileName);
 
-                const rearImageUrl = rearUrlData.publicUrl;
-                const vinImageUrl = vinUrlData.publicUrl;
                 const clusterImageUrl = clusterUrlData.publicUrl;
 
                 // =====================================================

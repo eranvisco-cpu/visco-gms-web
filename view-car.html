@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Vehicle - Visco GMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+</head>
+<body class="bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#141414] text-white min-h-screen p-6">
+    
+    <div class="max-w-5xl mx-auto">
+        <!-- Header with Back Button -->
+        <div class="mb-8 flex items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-bold text-yellow-400 mb-2">Vehicle Details</h1>
+                <p class="text-gray-500 text-sm">Inspection Information</p>
+            </div>
+            <button onclick="window.location.href='index.html'" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition">
+                ← Back
+            </button>
+        </div>
+
+        <!-- Main Content Container -->
+        <div id="jobCard" class="bg-[#1a1a1a] border border-gray-800 rounded-lg shadow-2xl p-8 space-y-8">
+
+            <!-- Top Section: Plate, Status, Customer -->
+            <div id="topSection" class="flex justify-between items-start pb-6 border-b border-gray-700">
+                <div>
+                    <h2 id="plateNumber" class="text-4xl font-bold text-yellow-400 uppercase mb-2">---</h2>
+                    <p id="customerName" class="text-gray-400 text-lg">Customer: ---</p>
+                </div>
+                <span id="statusBadge" class="bg-yellow-500 text-black text-sm font-bold px-4 py-2 rounded-lg">
+                    ---
+                </span>
+            </div>
+
+            <!-- Middle Section: Vehicle Details in 2 Columns -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Left Column -->
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-gray-500 text-xs uppercase tracking-wide">Vehicle Brand</p>
+                        <p id="vehicleBrand" class="text-xl font-semibold text-white">---</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs uppercase tracking-wide">Car Model</p>
+                        <p id="carModel" class="text-xl font-semibold text-white">---</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs uppercase tracking-wide">Mileage (km)</p>
+                        <p id="mileage" class="text-xl font-semibold text-white">---</p>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-gray-500 text-xs uppercase tracking-wide">Fuel Type</p>
+                        <p id="fuelType" class="text-xl font-semibold text-white">---</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs uppercase tracking-wide">Inspection Date & Time</p>
+                        <p id="dateTime" class="text-xl font-semibold text-white">---</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs uppercase tracking-wide">Phone</p>
+                        <p id="customerPhone" class="text-xl font-semibold text-white">---</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Voice / Notes -->
+            <div class="bg-[#252525] border border-gray-700 rounded-lg p-6">
+                <p class="text-gray-500 text-xs uppercase tracking-wide mb-2">Customer Notes</p>
+                <p id="customerVoice" class="text-white text-base leading-relaxed italic">---</p>
+            </div>
+
+            <!-- Photos Section -->
+            <div>
+                <p class="text-gray-500 text-xs uppercase tracking-wide mb-4">Inspection Photos</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Rear Photo -->
+                    <div>
+                        <p class="text-gray-400 text-sm mb-2 font-semibold">Rear Photo</p>
+                        <img id="rearPhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200'%3E%3Crect fill='%231a1a1a' width='300' height='200'/%3E%3Ctext x='150' y='100' text-anchor='middle' dy='.3em' fill='%23666' font-family='Arial' font-size='16' font-weight='bold'%3ERear Photo%3C/text%3E%3C/svg%3E" 
+                             class="w-full h-48 object-cover rounded-lg border border-gray-700 cursor-pointer hover:border-yellow-500 hover:shadow-lg transition"
+                             onclick="openLightbox(this.src, 'Rear Photo')" alt="Rear Photo">
+                    </div>
+
+                    <!-- VIN Photo -->
+                    <div>
+                        <p class="text-gray-400 text-sm mb-2 font-semibold">VIN Photo</p>
+                        <img id="vinPhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200'%3E%3Crect fill='%231a1a1a' width='300' height='200'/%3E%3Ctext x='150' y='100' text-anchor='middle' dy='.3em' fill='%23666' font-family='Arial' font-size='16' font-weight='bold'%3EVIN Photo%3C/text%3E%3C/svg%3E" 
+                             class="w-full h-48 object-cover rounded-lg border border-gray-700 cursor-pointer hover:border-yellow-500 hover:shadow-lg transition"
+                             onclick="openLightbox(this.src, 'VIN Photo')" alt="VIN Photo">
+                    </div>
+
+                    <!-- Cluster Photo -->
+                    <div>
+                        <p class="text-gray-400 text-sm mb-2 font-semibold">Instrument Cluster</p>
+                        <img id="clusterPhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200'%3E%3Crect fill='%231a1a1a' width='300' height='200'/%3E%3Ctext x='150' y='100' text-anchor='middle' dy='.3em' fill='%23666' font-family='Arial' font-size='16' font-weight='bold'%3ECluster%3C/text%3E%3C/svg%3E" 
+                             class="w-full h-48 object-cover rounded-lg border border-gray-700 cursor-pointer hover:border-yellow-500 hover:shadow-lg transition"
+                             onclick="openLightbox(this.src, 'Instrument Cluster')" alt="Cluster Photo">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Section -->
+            <div class="border-t border-gray-700 pt-8">
+                <p class="text-gray-500 text-xs uppercase tracking-wide mb-4 font-semibold">Actions</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button id="editBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        EDIT VEHICLE
+                    </button>
+                    
+                    <button id="deleteBtn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        DELETE VEHICLE
+                    </button>
+                    
+                    <button id="pdfBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2m0 0v-8m0 8H3m14.348-5.358l-1.4-1.4a1 1 0 00-1.414 0l-.828.828m2.628-2.628l2.83-2.829a2 2 0 012.828 0L21 7m-1 4l-9-9m0 0l-5 5m0 0v7a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
+                        </svg>
+                        DOWNLOAD PDF
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <button id="duplicateBtn" onclick="duplicateVehicle()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        RE-OPEN / DUPLICATE
+                    </button>
+                </div>
+            </div>
+
+            <!-- Back to Dashboard Button -->
+            <div class="flex gap-4 pt-6 border-t border-gray-700">
+                <button onclick="window.location.href='index.html'" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    BACK TO DASHBOARD
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Hidden PDF Template - Compact, Professional Job Card -->
+    <div id="pdf-template" class="hidden" style="width: 210mm; background-color: white; padding: 0; font-family: Arial, sans-serif; color: #000; font-size: 11px;">
+        
+        <!-- Header Section: Zero Top Margin, Professional Letterhead -->
+        <div style="padding: 12mm 10mm 8mm 10mm; text-align: center; border-bottom: 2px solid #d4af37;">
+            <h1 style="margin: 0; color: #d4af37; font-size: 28px; font-weight: bold; letter-spacing: 1px;">VISCO AUTO REPAIRS LLC</h1>
+            <p style="margin: 3px 0 0 0; color: #333; font-size: 12px; font-weight: 600;">Vehicle Inspection Report / Job Card</p>
+        </div>
+
+        <!-- Compact Vehicle & Customer Details Table -->
+        <div style="padding: 8mm 10mm 0 10mm;">
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 8mm;">
+                <tbody>
+                    <!-- Row 1: Plate & Customer Name -->
+                    <tr>
+                        <td style="width: 25%; padding: 4mm; border: 1px solid #ccc; background-color: #f9f9f9;">
+                            <p style="margin: 0 0 2px 0; font-weight: bold; color: #666; font-size: 9px; text-transform: uppercase;">Plate Number</p>
+                            <p id="pdf-plate" style="margin: 0; font-size: 12px; font-weight: bold; color: #000;">---</p>
+                        </td>
+                        <td style="width: 25%; padding: 4mm; border: 1px solid #ccc; background-color: #fff;">
+                            <p style="margin: 0 0 2px 0; font-weight: bold; color: #666; font-size: 9px; text-transform: uppercase;">Customer Name</p>
+                            <p id="pdf-customer" style="margin: 0; font-size: 11px; color: #000;">---</p>
+                        </td>
+                        <td style="width: 25%; padding: 4mm; border: 1px solid #ccc; background-color: #f9f9f9;">
+                            <p style="margin: 0 0 2px 0; font-weight: bold; color: #666; font-size: 9px; text-transform: uppercase;">Phone</p>
+                            <p id="pdf-phone" style="margin: 0; font-size: 11px; color: #000;">---</p>
+                        </td>
+                        <td style="width: 25%; padding: 4mm; border: 1px solid #ccc; background-color: #fff;">
+                            <p style="margin: 0 0 2px 0; font-weight: bold; color: #666; font-size: 9px; text-transform: uppercase;">Status</p>
+                            <p id="pdf-status" style="margin: 0; font-size: 11px; color: #fff; background-color: #d4af37; padding: 2px 4px; border-radius: 2px; font-weight: bold; text-align: center;">---</p>
+                        </td>
+                    </tr>
+
+                    <!-- Row 2: Brand, Model, Mileage, Fuel Type -->
+                    <tr>
+                        <td style="width: 25%; padding: 4mm; border: 1px solid #ccc; background-color: #fff;">
+                            <p style="margin: 0 0 2px 0; font-weight: bold; color: #666; font-size: 9px; text-transform: uppercase;">Brand</p>
+                            <p id="pdf-brand" style="margin: 0; font-size: 11px; color: #000;">---</p>
+                        </td>
+                        <td style="width: 25%; padding: 4mm; border: 1px solid #ccc; background-color: #f9f9f9;">
+                            <p style="margin: 0 0 2px 0; font-weight: bold; color: #666; font-size: 9px; text-transform: uppercase;">Model</p>
+                            <p id="pdf-model" style="margin: 0; font-size: 11px; color: #000;">---</p>
+                        </td>
+                        <td style="width: 25%; padding: 4mm; border: 1px solid #ccc; background-color: #fff;">
+                            <p style="margin: 0 0 2px 0; font-weight: bold; color: #666; font-size: 9px; text-transform: uppercase;">Mileage</p>
+                            <p id="pdf-mileage" style="margin: 0; font-size: 11px; color: #000;">---</p>
+                        </td>
+                        <td style="width: 25%; padding: 4mm; border: 1px solid #ccc; background-color: #f9f9f9;">
+                            <p style="margin: 0 0 2px 0; font-weight: bold; color: #666; font-size: 9px; text-transform: uppercase;">Fuel Type</p>
+                            <p id="pdf-fuel" style="margin: 0; font-size: 11px; color: #000;">---</p>
+                        </td>
+                    </tr>
+
+                    <!-- Row 3: Inspection Date & Time -->
+                    <tr>
+                        <td colspan="4" style="padding: 4mm; border: 1px solid #ccc; background-color: #f0f0f0;">
+                            <p style="margin: 0 0 2px 0; font-weight: bold; color: #666; font-size: 9px; text-transform: uppercase;">Inspection Date & Time</p>
+                            <p id="pdf-datetime" style="margin: 0; font-size: 11px; color: #000;">---</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Customer Remarks Section -->
+            <div style="margin-bottom: 6mm; padding: 5mm; background-color: #fafafa; border: 1px solid #ccc; border-radius: 2px;">
+                <p style="margin: 0 0 3px 0; font-weight: bold; color: #666; font-size: 9px; text-transform: uppercase;">Customer Remarks</p>
+                <p id="pdf-voice" style="margin: 0; font-size: 10px; color: #000; line-height: 1.4;">---</p>
+            </div>
+
+            <!-- Inspection Photos: Compact 3-Column Layout -->
+            <div style="margin-bottom: 6mm;">
+                <p style="margin: 0 0 4mm 0; font-weight: bold; color: #666; font-size: 9px; text-transform: uppercase;">Inspection Photos</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4mm;">
+                    <div style="text-align: center;">
+                        <p style="margin: 0 0 3px 0; font-size: 8px; font-weight: bold; color: #666;">Rear Photo</p>
+                        <img id="pdf-rear-photo" src="" style="width: 100%; height: 60px; object-fit: cover; border: 1px solid #ccc;">
+                    </div>
+                    <div style="text-align: center;">
+                        <p style="margin: 0 0 3px 0; font-size: 8px; font-weight: bold; color: #666;">VIN Photo</p>
+                        <img id="pdf-vin-photo" src="" style="width: 100%; height: 60px; object-fit: cover; border: 1px solid #ccc;">
+                    </div>
+                    <div style="text-align: center;">
+                        <p style="margin: 0 0 3px 0; font-size: 8px; font-weight: bold; color: #666;">Cluster</p>
+                        <img id="pdf-cluster-photo" src="" style="width: 100%; height: 60px; object-fit: cover; border: 1px solid #ccc;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="padding-top: 6mm; border-top: 1px solid #d4af37; text-align: center; font-size: 8px; color: #999;">
+                <p style="margin: 2px 0; color: #666;">Generated by VISCO GMS</p>
+                <p style="margin: 2px 0; color: #d4af37; font-weight: bold;">© 2026 Visco Auto Repairs LLC</p>
+                <p id="pdf-download-date" style="margin: 2px 0; color: #999; font-size: 7px;">---</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="hidden fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center p-4 z-50">
+        <div class="max-w-4xl max-h-[90vh] relative">
+            <img id="lightboxImage" src="" class="max-w-full max-h-[80vh] object-contain">
+            <p id="lightboxTitle" class="text-white text-center mt-4 text-lg font-semibold">---</p>
+            
+            <!-- Close Button -->
+            <button onclick="closeLightbox()" class="absolute top-0 right-0 bg-red-600 hover:bg-red-700 text-white p-3 rounded-lg transition -translate-y-16">
+                ✕ Close
+            </button>
+            
+            <!-- Click to close anywhere -->
+            <div onclick="closeLightbox()" class="absolute inset-0 -z-10"></div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================
+        // SUPABASE CONFIGURATION
+        // =====================================================
+        const SUPABASE_URL = 'https://tqrvcwkulrdqtbkyyvks.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_EKSG2uUBWxrrFTtzKcg0AA_i2IWdaRo';
+        
+        let supabaseClient;
+        
+        if (window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else {
+            console.error('Supabase library not loaded');
+        }
+
+        // =====================================================
+        // GET VEHICLE ID FROM URL
+        // =====================================================
+        function getVehicleIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        // =====================================================
+        // LOAD VEHICLE DATA
+        // =====================================================
+        async function loadVehicleData() {
+            const vehicleId = getVehicleIdFromUrl();
+            
+            if (!vehicleId) {
+                alert('No vehicle ID provided');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('vehicles')
+                    .select('*')
+                    .eq('id', vehicleId)
+                    .single();
+
+                if (error) {
+                    throw new Error(`Failed to load vehicle: ${error.message}`);
+                }
+
+                if (!data) {
+                    throw new Error('Vehicle not found');
+                }
+
+                displayVehicleData(data);
+            } catch (error) {
+                console.error('Error loading vehicle:', error);
+                alert(`Error: ${error.message}`);
+                window.location.href = 'index.html';
+            }
+        }
+
+        // =====================================================
+        // DISPLAY VEHICLE DATA
+        // =====================================================
+        function displayVehicleData(vehicle) {
+            // Top Section
+            document.getElementById('plateNumber').textContent = vehicle.plate_number || '---';
+            document.getElementById('customerName').textContent = `Customer: ${vehicle.customer_name || '---'}`;
+            document.getElementById('statusBadge').textContent = vehicle.status || 'INSPECTION';
+
+            // Left Column
+            document.getElementById('vehicleBrand').textContent = vehicle.vehicle_brand || '---';
+            document.getElementById('carModel').textContent = vehicle.car_model || '---';
+            document.getElementById('mileage').textContent = `${vehicle.mileage || '---'} km`;
+
+            // Right Column
+            document.getElementById('fuelType').textContent = vehicle.fuel_type || '---';
+            const inspectionDate = vehicle.inspection_date ? new Date(vehicle.inspection_date).toLocaleDateString() : 'N/A';
+            const inspectionTime = vehicle.inspection_time || 'N/A';
+            document.getElementById('dateTime').textContent = `${inspectionDate} at ${inspectionTime}`;
+            document.getElementById('customerPhone').textContent = vehicle.customer_phone || '---';
+
+            // Customer Voice
+            document.getElementById('customerVoice').textContent = vehicle.customer_voice || 'No additional notes';
+
+            // Photos
+            if (vehicle.image_url) {
+                document.getElementById('rearPhoto').src = vehicle.image_url;
+                document.getElementById('rearPhoto').onerror = function() {
+                    this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="200"%3E%3Crect fill="%23ddd" width="300" height="200"/%3E%3Ctext x="150" y="100" text-anchor="middle" dy=".3em" fill="%23999" font-family="Arial" font-size="14"%3ERear Photo Not Found%3C/text%3E%3C/svg%3E';
+                };
+            }
+
+            if (vehicle.vin_image_url) {
+                document.getElementById('vinPhoto').src = vehicle.vin_image_url;
+                document.getElementById('vinPhoto').onerror = function() {
+                    this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="200"%3E%3Crect fill="%23ddd" width="300" height="200"/%3E%3Ctext x="150" y="100" text-anchor="middle" dy=".3em" fill="%23999" font-family="Arial" font-size="14"%3EVIN Photo Not Found%3C/text%3E%3C/svg%3E';
+                };
+            }
+
+            if (vehicle.cluster_image_url) {
+                document.getElementById('clusterPhoto').src = vehicle.cluster_image_url;
+                document.getElementById('clusterPhoto').onerror = function() {
+                    this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="200"%3E%3Crect fill="%23ddd" width="300" height="200"/%3E%3Ctext x="150" y="100" text-anchor="middle" dy=".3em" fill="%23999" font-family="Arial" font-size="14"%3ECluster Not Found%3C/text%3E%3C/svg%3E';
+                };
+            }
+
+            // Edit Button
+            document.getElementById('editBtn').onclick = function() {
+                window.location.href = `edit-car.html?id=${vehicle.id}`;
+            };
+
+            // Delete Button
+            document.getElementById('deleteBtn').onclick = function() {
+                deleteVehicle(vehicle.id);
+            };
+
+            // PDF Download Button
+            document.getElementById('pdfBtn').onclick = function() {
+                downloadPDF(vehicle);
+            };
+        }
+
+        // =====================================================
+        // DELETE VEHICLE FUNCTION
+        // =====================================================
+        async function deleteVehicle(id) {
+            if (!confirm('Are you sure you want to delete this vehicle record? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('vehicles')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    alert(`Error deleting vehicle: ${error.message}`);
+                    console.error('Delete error:', error);
+                    return;
+                }
+
+                alert('Vehicle record deleted successfully!');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Unexpected error:', error);
+                alert('An unexpected error occurred. Please try again.');
+            }
+        }
+
+        // =====================================================
+        // DUPLICATE VEHICLE FUNCTION
+        // =====================================================
+        function duplicateVehicle() {
+            // Collect all vehicle data from the page
+            const duplicateData = {
+                customerName: document.getElementById('customerName').textContent.replace('Customer: ', '').trim(),
+                customerPhone: document.getElementById('customerPhone').textContent.trim(),
+                plate: document.getElementById('plateNumber').textContent.trim(),
+                brand: document.getElementById('vehicleBrand').textContent.trim(),
+                model: document.getElementById('carModel').textContent.trim(),
+                mileage: document.getElementById('mileage').textContent.trim(),
+                fuelType: document.getElementById('fuelType').textContent.trim(),
+                voice: document.getElementById('customerVoice').textContent.trim(),
+                rearPhotoUrl: document.getElementById('rearPhoto')?.src || '',
+                vinPhotoUrl: document.getElementById('vinPhoto')?.src || '',
+                isDuplicate: true
+            };
+
+            // Store in localStorage
+            localStorage.setItem('duplicateVehicleData', JSON.stringify(duplicateData));
+
+            // Redirect to add-car.html
+            window.location.href = 'add-car.html';
+        }
+
+        // =====================================================
+        // PDF DOWNLOAD FUNCTION - JSPDF WITH AUTOTABLE
+        // =====================================================
+        function downloadPDF(vehicle) {
+            const pdfBtn = document.getElementById('pdfBtn');
+            
+            // Show professional loading popup with spinner
+            Swal.fire({
+                title: 'Generating Professional Job Card',
+                html: 'Please wait while we prepare your PDF...<br><br><small style="color: #666; font-size: 12px;">⏱️ This typically takes 3-5 seconds as images are being processed and converted.</small>',
+                icon: null,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Gather all vehicle data
+            const plateNumber = document.getElementById('plateNumber').textContent.trim();
+            const customerName = document.getElementById('customerName').textContent.replace('Customer: ', '').trim();
+            const status = document.getElementById('statusBadge').textContent.trim();
+            const vehicleBrand = document.getElementById('vehicleBrand').textContent.trim();
+            const carModel = document.getElementById('carModel').textContent.trim();
+            const mileage = document.getElementById('mileage').textContent.trim();
+            const fuelType = document.getElementById('fuelType').textContent.trim();
+            const dateTime = document.getElementById('dateTime').textContent.trim();
+            const customerPhone = document.getElementById('customerPhone').textContent.trim();
+            const customerVoice = document.getElementById('customerVoice').textContent.trim();
+            
+            // Get image sources from DOM
+            const rearPhotoSrc = document.getElementById('rearPhoto')?.src || '';
+            const vinPhotoSrc = document.getElementById('vinPhoto')?.src || '';
+            const clusterPhotoSrc = document.getElementById('clusterPhoto')?.src || '';
+            
+            // Cache buster function for Supabase URLs
+            function addCacheBuster(url) {
+                if (!url) return url;
+                const timestamp = new Date().getTime();
+                const separator = url.includes('?') ? '&' : '?';
+                return `${url}${separator}t=${timestamp}`;
+            }
+            
+            // Convert image URL to Base64 string
+            function imageToBase64(src) {
+                return new Promise((resolve) => {
+                    if (!src) {
+                        // Return placeholder if no image
+                        resolve('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+                        return;
+                    }
+                    
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    const cacheBustedUrl = addCacheBuster(src);
+                    
+                    img.onload = () => {
+                        try {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+                            resolve(canvas.toDataURL('image/jpeg', 0.95));
+                        } catch (e) {
+                            // Silent fallback - return placeholder
+                            resolve('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+                        }
+                    };
+                    
+                    img.onerror = () => {
+                        // Silent fallback - return placeholder on failed load
+                        resolve('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+                    };
+                    
+                    img.src = cacheBustedUrl;
+                });
+            }
+            
+            // Convert all images in parallel
+            Promise.all([
+                imageToBase64(rearPhotoSrc),
+                imageToBase64(vinPhotoSrc),
+                imageToBase64(clusterPhotoSrc)
+            ]).then(([rearB64, vinB64, clusterB64]) => {
+                try {
+                    // Initialize jsPDF document
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF('p', 'mm', 'a4');
+                    
+                    // Colors
+                    const goldColor = [212, 175, 55];      // #d4af37
+                    const darkGray = [51, 51, 51];         // #333
+                    const lightGray = [80, 80, 80];        // #505050
+                    
+                    // Page dimensions
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    let yPosition = 15; // Top margin 15mm
+                    
+                    // ===== HEADER =====
+                    doc.setFontSize(24);
+                    doc.setTextColor(...goldColor);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('VISCO AUTO REPAIRS LLC', pageWidth / 2, yPosition, { align: 'center' });
+                    yPosition += 10;
+                    
+                    // Subtitle
+                    doc.setFontSize(11);
+                    doc.setTextColor(...darkGray);
+                    doc.setFont(undefined, 'normal');
+                    doc.text('Vehicle Inspection Report / Job Card', pageWidth / 2, yPosition, { align: 'center' });
+                    yPosition += 8;
+                    
+                    // Horizontal line
+                    doc.setDrawColor(...goldColor);
+                    doc.setLineWidth(0.5);
+                    doc.line(10, yPosition, 200, yPosition);
+                    yPosition += 8;
+                    
+                    // ===== VEHICLE DETAILS TABLE =====
+                    doc.autoTable({
+                        startY: yPosition,
+                        head: [['Plate Number', 'Brand', 'Model', 'Mileage']],
+                        body: [
+                            [plateNumber, vehicleBrand, carModel, mileage]
+                        ],
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: goldColor,
+                            textColor: [255, 255, 255],
+                            fontStyle: 'bold',
+                            fontSize: 10,
+                            halign: 'center',
+                            cellPadding: 3
+                        },
+                        bodyStyles: {
+                            textColor: darkGray,
+                            fontSize: 10,
+                            halign: 'center',
+                            cellPadding: 3
+                        },
+                        columnStyles: {
+                            0: { halign: 'center' },
+                            1: { halign: 'center' },
+                            2: { halign: 'center' },
+                            3: { halign: 'center' }
+                        },
+                        margin: { left: 10, right: 10 }
+                    });
+                    
+                    // Get position after first table
+                    yPosition = doc.lastAutoTable.finalY + 8;
+                    
+                    // ===== CUSTOMER INFO TABLE =====
+                    doc.autoTable({
+                        startY: yPosition,
+                        head: [['Customer Name', 'Phone', 'Fuel Type', 'Status']],
+                        body: [
+                            [customerName, customerPhone, fuelType, status]
+                        ],
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: goldColor,
+                            textColor: [255, 255, 255],
+                            fontStyle: 'bold',
+                            fontSize: 10,
+                            halign: 'center',
+                            cellPadding: 3
+                        },
+                        bodyStyles: {
+                            textColor: darkGray,
+                            fontSize: 10,
+                            halign: 'center',
+                            cellPadding: 3
+                        },
+                        columnStyles: {
+                            0: { halign: 'center' },
+                            1: { halign: 'center' },
+                            2: { halign: 'center' },
+                            3: { halign: 'center' }
+                        },
+                        margin: { left: 10, right: 10 }
+                    });
+                    
+                    yPosition = doc.lastAutoTable.finalY + 8;
+                    
+                    // ===== INSPECTION DATE & CAPTION =====
+                    doc.setFontSize(9);
+                    doc.setTextColor(...lightGray);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Inspection Date & Time:', 10, yPosition);
+                    doc.setFont(undefined, 'normal');
+                    doc.text(dateTime, 70, yPosition);  // Same Y position as label for tight spacing
+                    yPosition += 7;
+                    
+                    // ===== CUSTOMER REMARKS =====
+                    doc.setFontSize(8);
+                    doc.setTextColor(...lightGray);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Customer Remarks:', 10, yPosition);
+                    yPosition += 3;
+                    
+                    // Word-wrap customer voice with increased line spacing for readability
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(...darkGray);
+                    const wrappedVoice = doc.splitTextToSize(customerVoice || 'No remarks provided', 190);
+                    doc.text(wrappedVoice, 10, yPosition, { lineHeightFactor: 1.5 });
+                    yPosition += wrappedVoice.length * 3.5 + 8;  // Increased spacing for breathing room
+                    
+                    // ===== INSPECTION PHOTOS - CLEAN GALLERY =====
+                    // Photos span full width with minimal spacing, no captions
+                    const imgWidth = 62;  // Maximized to use full page width
+                    const imgHeight = 45; // Proportional height
+                    const spacing = 1;    // Minimal spacing between images
+                    const startX = 10;
+                    
+                    // Rear Photo
+                    doc.addImage(rearB64, 'JPEG', startX, yPosition, imgWidth, imgHeight);
+                    
+                    // VIN Photo
+                    doc.addImage(vinB64, 'JPEG', startX + imgWidth + spacing, yPosition, imgWidth, imgHeight);
+                    
+                    // Cluster Photo
+                    doc.addImage(clusterB64, 'JPEG', startX + 2 * (imgWidth + spacing), yPosition, imgWidth, imgHeight);
+                    
+                    // ===== FOOTER =====
+                    const pageHeight = doc.internal.pageSize.getHeight();
+                    doc.setFontSize(7);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text(`Generated by VISCO GMS | ${new Date().toLocaleString()}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
+                    
+                    // Save PDF
+                    doc.save(`JobCard_${plateNumber.replace(/\s+/g, '_')}.pdf`);
+                    
+                    // Close loading popup and show success toast
+                    Swal.close();
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Job Card Downloaded Successfully!',
+                        icon: 'success',
+                        toast: true,
+                        position: 'bottom-right',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                    
+                } catch (error) {
+                    console.error('Error generating PDF:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error generating PDF. Please try again.',
+                        icon: 'error',
+                        confirmButtonColor: '#d4af37'
+                    });
+                }
+                
+            }).catch(error => {
+                console.error('Error converting images:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Error converting images to Base64. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#d4af37'
+                });
+            });
+        }
+
+        // =====================================================
+        // LIGHTBOX FUNCTIONALITY
+        // =====================================================
+        function openLightbox(imageSrc, title) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImage = document.getElementById('lightboxImage');
+            const lightboxTitle = document.getElementById('lightboxTitle');
+            
+            lightboxImage.src = imageSrc;
+            lightboxTitle.textContent = title;
+            lightbox.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close lightbox on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            }
+        });
+
+        // =====================================================
+        // LOAD DATA ON PAGE LOAD
+        // =====================================================
+        window.addEventListener('DOMContentLoaded', loadVehicleData);
+    </script>
+</body>
+</html>
